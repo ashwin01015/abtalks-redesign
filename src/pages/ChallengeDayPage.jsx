@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/Button';
@@ -6,8 +6,9 @@ import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Input from '../components/Input';
 import BottomNavigation from '../components/BottomNavigation';
-import { MISSION_DAY_12 } from '../data/mockData';
-import { Check, Clock, Award, Github, Linkedin, ArrowLeft, Flame, Sparkles, CheckCircle2 } from 'lucide-react';
+import DailyTestSection from '../components/DailyTestSection';
+import { MISSION_DAY_12, getSavedTestResult } from '../data/mockData';
+import { Check, Clock, Award, Github, Linkedin, ArrowLeft, Flame, Sparkles, CheckCircle2, FileCheck } from 'lucide-react';
 
 export default function ChallengeDayPage() {
   const navigate = useNavigate();
@@ -21,8 +22,18 @@ export default function ChallengeDayPage() {
   const [githubAdded, setGithubAdded] = useState(false);
   const [linkedinAdded, setLinkedinAdded] = useState(false);
 
+  // Daily test evaluation result state
+  const [testResult, setTestResult] = useState(null);
+
   // Submission / Success state
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    const savedTest = getSavedTestResult();
+    if (savedTest) {
+      setTestResult(savedTest);
+    }
+  }, []);
 
   const toggleCheckItem = (id) => {
     setChecklist(
@@ -33,21 +44,24 @@ export default function ChallengeDayPage() {
   };
 
   const handleAddGithub = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (githubUrl.trim()) {
       setGithubAdded(true);
     }
   };
 
   const handleAddLinkedin = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (linkedinUrl.trim()) {
       setLinkedinAdded(true);
     }
   };
 
+  const handleTestComplete = (evalData) => {
+    setTestResult(evalData);
+  };
+
   const handleSubmitMission = () => {
-    // Simulated submission state transition
     setIsSubmitted(true);
   };
 
@@ -77,35 +91,58 @@ export default function ChallengeDayPage() {
         {/* PAGE CONTENT */}
         <main className="px-5 space-y-7 pt-5 flex-1">
           
-          {/* SUCCESS CELEBRATION STATE */}
+          {/* SUCCESS CELEBRATION STATE (PART 11) */}
           {isSubmitted ? (
-            <div className="py-8 space-y-6 text-center animate-fadeIn">
+            <div className="py-6 space-y-6 text-center animate-fadeIn">
               <div className="w-20 h-20 bg-[#FF5A36]/10 text-[#FF5A36] rounded-full flex items-center justify-center mx-auto text-4xl border-2 border-[#FF5A36]/30 shadow-lg">
                 🎉
               </div>
 
               <div>
-                <Badge variant="orange" className="mb-2">MISSION COMPLETED</Badge>
-                <h1 className="text-[30px] font-extrabold text-[#111111] leading-tight">
+                <Badge variant="orange" className="mb-2">DAY 12 COMPLETE 🎉</Badge>
+                <h1 className="text-[28px] font-black text-[#111111] leading-tight">
                   Day 12 complete!
                 </h1>
-                <p className="text-[15px] text-[#6B6B6B] mt-2">
+                <p className="text-[14px] text-[#6B6B6B] mt-1.5">
                   You kept your streak alive. Fantastic consistency!
                 </p>
               </div>
 
-              {/* Streak Upgrade Card */}
-              <Card variant="dark" className="p-6 text-center space-y-3">
-                <span className="small-label text-[#FF5A36]">STREAK UPDATED</span>
-                <div className="flex items-center justify-center gap-3 text-[32px] font-black text-white">
-                  <span>11</span>
-                  <span className="text-[#FF5A36]">→</span>
-                  <span className="text-[#FF5A36] flex items-center gap-1">
-                    12 🔥
-                  </span>
+              {/* Day Completion Summary Card */}
+              <Card variant="dark" className="p-5 text-left space-y-3.5 border-[#262626]">
+                <div className="flex items-center justify-between border-b border-[#262626] pb-2.5">
+                  <span className="small-label text-[#FF5A36]">DAY SUMMARY</span>
+                  <span className="text-[12px] font-bold text-emerald-400">PASSED</span>
                 </div>
-                <div className="text-[13px] font-semibold text-[#888888]">
-                  12 days completed out of 60
+
+                <div className="space-y-2.5 text-[14px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#AAAAAA]">Test score:</span>
+                    <span className="font-extrabold text-white">
+                      {testResult ? `${testResult.score} / 5 (${testResult.percentage}%)` : 'Not Attempted'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#AAAAAA]">GitHub proof:</span>
+                    <span className={githubAdded ? 'font-bold text-emerald-400' : 'text-[#777777]'}>
+                      {githubAdded ? '✓ Submitted' : 'Pending'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#AAAAAA]">LinkedIn proof:</span>
+                    <span className={linkedinAdded ? 'font-bold text-emerald-400' : 'text-[#777777]'}>
+                      {linkedinAdded ? '✓ Submitted' : 'Pending'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-[#262626]">
+                    <span className="text-[#AAAAAA]">Streak:</span>
+                    <span className="font-extrabold text-[#FF5A36] flex items-center gap-1">
+                      12 days 🔥
+                    </span>
+                  </div>
                 </div>
               </Card>
 
@@ -151,9 +188,12 @@ export default function ChallengeDayPage() {
                 </Card>
               </section>
 
-              {/* SECTION: WHAT YOU'LL BUILD */}
+              {/* SECTION 1: BUILD - WHAT YOU'LL BUILD */}
               <section className="space-y-3">
-                <h2 className="section-title text-[18px]">What you'll build</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="section-title text-[18px]">1. What you'll build</h2>
+                  <span className="small-label text-[#FF5A36]">BUILD</span>
+                </div>
                 <Card className="p-0 overflow-hidden divide-y divide-[#E6E6E1]">
                   {checklist.map((item) => (
                     <div
@@ -190,29 +230,24 @@ export default function ChallengeDayPage() {
                 </Card>
               </section>
 
-              {/* SECTION: BEFORE YOU SUBMIT */}
-              <section className="space-y-3">
-                <h2 className="section-title text-[18px]">Before you submit</h2>
-                <div className="bg-white rounded-[18px] border border-[#E6E6E1] divide-y divide-[#E6E6E1]">
-                  {MISSION_DAY_12.submissionRequirements.map((req) => (
-                    <div key={req.step} className="p-3.5 px-4 flex items-center gap-3">
-                      <span className="font-mono font-extrabold text-[14px] text-[#FF5A36]">
-                        {req.step}
-                      </span>
-                      <span className="text-[14px] font-semibold text-[#111111]">
-                        {req.text}
-                      </span>
-                    </div>
-                  ))}
+              {/* SECTION 2: TEST - DAILY TEST EVALUATION ENGINE (PART 1 - 5) */}
+              <section className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <h2 className="section-title text-[18px]">2. Knowledge Evaluation</h2>
+                  <span className="small-label text-[#FF5A36]">TEST</span>
                 </div>
+
+                <DailyTestSection onComplete={handleTestComplete} />
               </section>
 
-              {/* PROOF OF WORK SECTION */}
+              {/* SECTION 3: PROOF OF WORK */}
               <section className="space-y-4 pt-2">
-                <div>
-                  <span className="small-label text-[#FF5A36]">PROOF OF WORK</span>
-                  <h2 className="section-title text-[22px] mt-0.5">Submit your proof</h2>
-                  <p className="text-[13px] text-[#6B6B6B]">Show the world what you built.</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="section-title text-[20px]">3. Proof of Work</h2>
+                    <p className="text-[13px] text-[#6B6B6B]">Show the world what you built.</p>
+                  </div>
+                  <span className="small-label text-[#FF5A36]">PROOF</span>
                 </div>
 
                 {/* GITHUB CARD */}
@@ -235,6 +270,7 @@ export default function ChallengeDayPage() {
                     variant={githubAdded ? 'secondary' : 'dark'}
                     size="sm"
                     onClick={handleAddGithub}
+                    className="min-h-[44px]"
                   >
                     {githubAdded ? '✓ GitHub Proof Added' : 'Add GitHub proof'}
                   </Button>
@@ -260,6 +296,7 @@ export default function ChallengeDayPage() {
                     variant={linkedinAdded ? 'secondary' : 'dark'}
                     size="sm"
                     onClick={handleAddLinkedin}
+                    className="min-h-[44px]"
                   >
                     {linkedinAdded ? '✓ LinkedIn Proof Added' : 'Add LinkedIn proof'}
                   </Button>
@@ -270,9 +307,9 @@ export default function ChallengeDayPage() {
                   <Button
                     variant="primary"
                     onClick={handleSubmitMission}
-                    className="h-[52px] text-[15px] font-bold shadow-lg shadow-[#FF5A36]/20"
+                    className="h-[52px] min-h-[44px] text-[15px] font-bold shadow-lg shadow-[#FF5A36]/20"
                   >
-                    Submit Day 12
+                    Complete Day 12 →
                   </Button>
                 </div>
               </section>

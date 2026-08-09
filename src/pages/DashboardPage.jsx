@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -6,23 +6,39 @@ import Badge from '../components/Badge';
 import ProgressBar from '../components/ProgressBar';
 import BottomNavigation from '../components/BottomNavigation';
 import BuildChain from '../components/BuildChain';
-import { INITIAL_STUDENT_DATA, MISSION_DAY_12, ACHIEVEMENTS, RECENT_ACTIVITY } from '../data/mockData';
-import { CheckCircle2, Clock, Code, AlertTriangle, Sparkles, User, RefreshCw } from 'lucide-react';
+import { INITIAL_STUDENT_DATA, MISSION_DAY_12, ACHIEVEMENTS, RECENT_ACTIVITY, getSavedProfileName, getSavedTestResult } from '../data/mockData';
+import { CheckCircle2, Clock, Code, AlertTriangle, Sparkles, User, RefreshCw, Award, FileCheck } from 'lucide-react';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
 
-  // State mode for testing edge cases requested in Prompt 5
-  // 'NORMAL' | 'FIRST_DAY' | 'MISSED_DAY' | 'EMPTY_PROFILE'
+  // Saved local state
+  const [profileName, setProfileName] = useState('');
+  const [testResult, setTestResult] = useState(null);
+
+  // State mode for testing edge cases
   const [activeStateMode, setActiveStateMode] = useState('NORMAL');
 
-  // Dynamic values based on active state mode
+  useEffect(() => {
+    const name = getSavedProfileName();
+    if (name) setProfileName(name);
+
+    const test = getSavedTestResult();
+    if (test) setTestResult(test);
+  }, []);
+
   const isFirstDay = activeStateMode === 'FIRST_DAY';
   const isMissedDay = activeStateMode === 'MISSED_DAY';
-  const isEmptyProfile = activeStateMode === 'EMPTY_PROFILE';
+  const forceEmptyProfile = activeStateMode === 'EMPTY_PROFILE';
+
+  // Effective profile name
+  const effectiveName = forceEmptyProfile ? '' : profileName;
+  const isProfileComplete = Boolean(effectiveName && effectiveName.trim());
+
+  // Dynamic greeting string (Part 8)
+  const greetingText = isProfileComplete ? `Hi, ${effectiveName} 👋` : 'Hi there 👋';
 
   const currentDay = isFirstDay ? 1 : 12;
-  const currentStreak = isFirstDay ? 0 : isMissedDay ? 0 : 11;
   const completedDays = isFirstDay ? [] : isMissedDay ? [1,2,3,4,5,6,7,8,9,10] : [1,2,3,4,5,6,7,8,9,10,11];
   const progressPercent = isFirstDay ? 0 : Math.round((completedDays.length / 60) * 100);
 
@@ -69,15 +85,19 @@ export default function DashboardPage() {
         <header className="px-5 pt-6 pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[13px] font-medium text-[#6B6B6B]">Good evening,</span>
+              <span className="text-[13px] font-medium text-[#6B6B6B]">Good day,</span>
               <h1 className="text-[24px] font-extrabold text-[#111111] leading-tight">
-                {isEmptyProfile ? 'Developer 👋' : 'Alex 👋'}
+                {greetingText}
               </h1>
             </div>
 
-            <div className="w-11 h-11 rounded-full bg-[#171717] text-white font-bold text-lg flex items-center justify-center border-2 border-white shadow-sm">
-              {isEmptyProfile ? <User size={20} /> : 'A'}
-            </div>
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-11 h-11 rounded-full bg-[#171717] text-white font-bold text-lg flex items-center justify-center border-2 border-white shadow-sm hover:ring-2 hover:ring-[#FF5A36] transition-all"
+              title="View Profile"
+            >
+              {isProfileComplete ? effectiveName.charAt(0).toUpperCase() : <User size={20} />}
+            </button>
           </div>
 
           <div className="mt-4">
@@ -91,27 +111,31 @@ export default function DashboardPage() {
         {/* DASHBOARD CONTENT */}
         <main className="px-5 space-y-6 pt-2">
           
-          {/* STATE 3: EMPTY PROFILE BANNER (Prompt 5) */}
-          {isEmptyProfile && (
-            <Card variant="highlight" className="border-dashed border-[#FF5A36]">
+          {/* PROFILE COMPLETION CARD (Part 6 & 8) */}
+          {!isProfileComplete && (
+            <Card variant="highlight" className="border-dashed border-[#FF5A36] bg-white">
               <div className="flex items-start justify-between">
                 <div>
                   <Badge variant="warning" className="mb-2">ACTION REQUIRED</Badge>
-                  <h3 className="font-bold text-[16px] text-[#111111]">Complete your profile</h3>
-                  <p className="text-[13px] text-[#6B6B6B] mt-1">
-                    Add a name, track and profile photo to personalize your journey.
+                  <h3 className="font-bold text-[17px] text-[#111111]">Complete your profile</h3>
+                  <p className="text-[13px] text-[#6B6B6B] mt-1 leading-snug">
+                    Add your name and personalize your ABTalks experience.
                   </p>
                 </div>
               </div>
-              <Button variant="dark" size="sm" className="mt-3">
-                Complete Profile
+              <Button
+                variant="dark"
+                size="sm"
+                onClick={() => navigate('/profile')}
+                className="mt-3.5 h-[44px] font-bold"
+              >
+                Complete Profile →
               </Button>
             </Card>
           )}
 
-          {/* STREAK CARD (Prompt 3 & 5) */}
+          {/* STREAK CARD */}
           {isMissedDay ? (
-            /* MISSED DAY RECOVERY CARD (Prompt 5 State 2) */
             <Card variant="dark" className="border border-amber-500/30">
               <div className="flex items-center justify-between mb-2">
                 <span className="small-label text-amber-400">STREAK RECOVERY</span>
@@ -139,7 +163,6 @@ export default function DashboardPage() {
               </div>
             </Card>
           ) : isFirstDay ? (
-            /* FIRST DAY CARD (Prompt 5 State 1) */
             <Card variant="dark">
               <span className="small-label text-[#FF5A36]">DAY 1 READY</span>
               <div className="text-[24px] font-extrabold text-white my-1.5 leading-tight">
@@ -155,7 +178,6 @@ export default function DashboardPage() {
               </div>
             </Card>
           ) : (
-            /* NORMAL DAY STREAK CARD (Prompt 3) */
             <Card variant="dark" className="border border-[#262626]">
               <span className="small-label text-[#FF5A36]">CURRENT STREAK</span>
 
@@ -177,7 +199,7 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* BUILD CHAIN COMPONENT ("Don't Break the Chain" Prompt 6) */}
+          {/* BUILD CHAIN COMPONENT */}
           <BuildChain
             completedDays={completedDays}
             currentDay={currentDay}
@@ -185,6 +207,65 @@ export default function DashboardPage() {
             totalDays={60}
             isMissed={isMissedDay}
           />
+
+          {/* LATEST TEST RESULT CARD (Part 10) */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="section-title text-[19px]">Latest Test Performance</h2>
+              <span className="text-[12px] font-bold text-[#FF5A36]">Day 12 Test</span>
+            </div>
+
+            {testResult ? (
+              <Card className="border border-[#E6E6E1] p-4 space-y-3 bg-white">
+                <div className="flex items-center justify-between border-b border-[#E6E6E1] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <FileCheck size={18} className="text-[#FF5A36]" />
+                    <span className="font-extrabold text-[15px] text-[#111111]">Daily Evaluation</span>
+                  </div>
+                  <Badge variant="orange">{testResult.percentage}% Score</Badge>
+                </div>
+
+                <div className="flex items-baseline justify-between pt-1">
+                  <div>
+                    <span className="text-[12px] font-bold text-[#6B6B6B] uppercase tracking-wider block">Score</span>
+                    <span className="text-[28px] font-black text-[#111111]">{testResult.score} / {testResult.totalQuestions}</span>
+                  </div>
+
+                  <div className="text-right text-[12px] space-y-0.5">
+                    <div className="text-emerald-600 font-bold">✓ {testResult.correctCount} Correct</div>
+                    <div className="text-red-500 font-bold">✗ {testResult.wrongCount} Wrong</div>
+                    <div className="text-amber-600 font-bold">• {testResult.notAttemptedCount} Unanswered</div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate('/day/12')}
+                    className="w-full text-[13px] font-bold"
+                  >
+                    View / Retake Test →
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <Card className="border border-[#E6E6E1] p-4 flex items-center justify-between bg-white">
+                <div>
+                  <h4 className="font-bold text-[15px] text-[#111111]">No test attempted yet</h4>
+                  <p className="text-[13px] text-[#6B6B6B]">Complete the 5-question test on Day 12.</p>
+                </div>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => navigate('/day/12')}
+                  className="font-bold shrink-0 ml-2"
+                >
+                  Take Test →
+                </Button>
+              </Card>
+            )}
+          </section>
 
           {/* PROGRESS SECTION */}
           <section className="space-y-2.5">

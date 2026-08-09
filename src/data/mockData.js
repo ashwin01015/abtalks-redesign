@@ -1,6 +1,6 @@
 export const INITIAL_STUDENT_DATA = {
   name: "Alex",
-  track: "Full-Stack Developer",
+  track: "Web Development",
   avatar: "A",
   currentDay: 12,
   totalDays: 60,
@@ -56,3 +56,82 @@ export const RECENT_ACTIVITY = [
   { day: 10, title: "JavaScript quiz", status: "completed", date: "2 days ago" },
   { day: 9, title: "Weather app", status: "completed", date: "3 days ago" },
 ];
+
+export const DAILY_TEST_QUESTIONS = [
+  {
+    id: 1,
+    question: "What is the primary role of React's useState hook?",
+    options: [
+      "A) Manage local state in a functional component",
+      "B) Perform HTTP network requests asynchronously",
+      "C) Directly update the HTML document title",
+      "D) Compile CSS styles into JavaScript objects"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: 2,
+    question: "Which semantic HTML element is used to represent an unordered list?",
+    options: [
+      "A) <ol>",
+      "B) <ul>",
+      "C) <li>",
+      "D) <list>"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: 3,
+    question: "In CSS Flexbox, which property aligns flex items along the main axis?",
+    options: [
+      "A) align-items",
+      "B) align-content",
+      "C) justify-content",
+      "D) flex-direction"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: 4,
+    question: "What does the JavaScript Array method .map() return?",
+    options: [
+      "A) A single accumulated value",
+      "B) A brand new array with transformed elements",
+      "C) A boolean value indicating if elements match",
+      "D) The original array mutated in place"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: 5,
+    question: "Which HTTP status code represents '200 OK' / successful request?",
+    options: [
+      "A) 404",
+      "B) 500",
+      "C) 301",
+      "D) 200"
+    ],
+    correctAnswer: "D"
+  }
+];
+
+export const getSavedProfileName = () => {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('abtalks_profile_name') || '';
+};
+
+export const saveProfileName = (name) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('abtalks_profile_name', name.trim());
+};
+
+export const getSavedTestResult = () => {
+  if (typeof window === 'undefined') return null;
+  const data = localStorage.getItem('abtalks_test_result');
+  return data ? JSON.parse(data) : null;
+};
+
+export const saveTestResult = (result) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('abtalks_test_result', JSON.stringify(result));
+};

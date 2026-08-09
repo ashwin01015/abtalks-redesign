@@ -9,6 +9,7 @@ export default function BottomNavigation() {
     { label: 'Home', path: '/', icon: Home },
     { label: 'Journey', path: '/dashboard', icon: Compass },
     { label: 'Day 12', path: '/day/12', icon: Calendar },
+    { label: 'Profile', path: '/profile', icon: User },
   ];
 
   return (
